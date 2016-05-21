@@ -19,6 +19,30 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World!');
+        let highlights: vscode.DocumentHighlight[] = [];
+        var smallNumbers : vscode.DecorationOptions[] = [];
+        let activeEditor = vscode.window.activeTextEditor;
+        let lineRange = new vscode.Range(0, 0, 1, 10);
+        var decoration = { range: lineRange, hoverMessage: 'Something Here'};
+        smallNumbers.push(decoration);
+        let highlight = new vscode.DocumentHighlight(lineRange, vscode.DocumentHighlightKind.Text);
+        highlights.push(highlight);
+        var smallNumberDecorationType = vscode.window.createTextEditorDecorationType({
+            borderWidth: '2px',
+            borderStyle: 'solid',
+            overviewRulerColor: 'red',
+            overviewRulerLane: vscode.OverviewRulerLane.Right,
+            light: {
+                // this color will be used in light color themes
+                borderColor: 'darkred'
+            },
+            dark: {
+                // this color will be used in dark color themes
+                borderColor: 'lightred'
+            }
+        });
+        activeEditor.setDecorations(smallNumberDecorationType, smallNumbers);
+        console.log(activeEditor.document.lineCount);
     });
 
     context.subscriptions.push(disposable);
