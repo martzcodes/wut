@@ -3,6 +3,9 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
+import fs = require('fs');
+import path = require('path');
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -17,8 +20,8 @@ export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('extension.sayHello', () => {
         // The code you place here will be executed every time your command is executed
 
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World!');
+        let lcovPath = vscode.workspace.getConfiguration('wut').get('lcov') as string;
+        let lcov = "";
         let activeEditor = vscode.window.activeTextEditor;
         let notCovered = vscode.window.createTextEditorDecorationType({
             isWholeLine: true,
@@ -55,39 +58,48 @@ export function activate(context: vscode.ExtensionContext) {
                 overviewRulerColor: 'lightgreen'
             }
         });
-        
+
         let highlights: vscode.DocumentHighlight[] = [];
-        let notCoveredLines : vscode.DecorationOptions[] = [];
-        let coveredLines : vscode.DecorationOptions[] = [];
-        
-        // activeEditor.document.lineCount
-        
-        for(let lineNum: number = 0; lineNum < activeEditor.document.lineCount; lineNum++) {
-            let lineRange = new vscode.Range(lineNum, 0, lineNum, 0);
-            if (lineNum % 2 === 0) {
-                // even
-                let notCoveredDecoration = { range: lineRange, hoverMessage: ''};
-                notCoveredLines.push(notCoveredDecoration);
-            } else {
-                //odd
-                let coveredDecoration = { range: lineRange, hoverMessage: ''};
-                coveredLines.push(coveredDecoration);
+        let notCoveredLines: vscode.DecorationOptions[] = [];
+        let coveredLines: vscode.DecorationOptions[] = [];
+        vscode.window.showInformationMessage('Hello World!');
+
+        fs.readFile(path.join(vscode.workspace.rootPath, lcovPath), function (err, data) {
+            if (err) {
+                console.log(err);
             }
-        }
-        
-        // let lineRange = new vscode.Range(0, 0, 1, 10);
-        // let notCoveredDecoration = { range: lineRange, hoverMessage: 'Something Here'};
-        // notCoveredLines.push(notCoveredDecoration);
-        // let highlight = new vscode.DocumentHighlight(lineRange, vscode.DocumentHighlightKind.Text);
-        // highlights.push(highlight);
-        
-        activeEditor.setDecorations(notCovered, notCoveredLines);
-        activeEditor.setDecorations(covered, coveredLines);
-        
-        let outChannel = vscode.window.createOutputChannel("test");
-        outChannel.show(true);
-        outChannel.append("hello");
-        
+
+            lcov = data.toString();
+            let matches = lcov.match(/(TN:[\s\S]*?)end_of_record/g);
+            matches.forEach((value) => {
+                let fileName = path.join(vscode.workspace.rootPath, value.match(/SF:([\s\S]*?)\n/)[1]);
+                if (fileName === activeEditor.document.fileName) {
+                    console.log("file name matched");
+                }
+            });
+            for (let lineNum: number = 0; lineNum < activeEditor.document.lineCount; lineNum++) {
+                let lineRange = new vscode.Range(lineNum, 0, lineNum, 0);
+                if (lineNum % 2 === 0) {
+                    // even
+                    let notCoveredDecoration = { range: lineRange, hoverMessage: '' };
+                    notCoveredLines.push(notCoveredDecoration);
+                } else {
+                    //odd
+                    let coveredDecoration = { range: lineRange, hoverMessage: '' };
+                    coveredLines.push(coveredDecoration);
+                }
+            }
+
+            // let highlight = new vscode.DocumentHighlight(lineRange, vscode.DocumentHighlightKind.Text);
+            // highlights.push(highlight);
+
+            activeEditor.setDecorations(notCovered, notCoveredLines);
+            activeEditor.setDecorations(covered, coveredLines);
+
+            let outChannel = vscode.window.createOutputChannel("test");
+            outChannel.show(true);
+            outChannel.append("hello");
+        });
     });
 
     context.subscriptions.push(disposable);

@@ -15,10 +15,22 @@
     ],
     "main": "./out/src/extension",
     "contributes": {
-        "commands": [{
-            "command": "extension.sayHello",
-            "title": "Hello World"
-        }]
+        "commands": [
+            {
+                "command": "extension.sayHello",
+                "title": "Hello World"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "wut configuration",
+            "properties": {
+                "wut.lcov": {
+                    "type": "string",
+                    "description": "Specifies the folder path containing lcov.info"
+                }
+            }
+        }
     },
     "scripts": {
         "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
