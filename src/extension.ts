@@ -74,21 +74,41 @@ export function activate(context: vscode.ExtensionContext) {
             matches.forEach((value) => {
                 let fileName = path.join(vscode.workspace.rootPath, value.match(/SF:([\s\S]*?)\n/)[1]);
                 if (fileName === activeEditor.document.fileName) {
+                    let lines = value.split('\n');
+                    let FNs = lines.filter(function(line){
+                        return line.indexOf('FN:') > -1;
+                    });
+                    let FNDAs = lines.filter(function(line) {
+                        return line.indexOf('FNDA:') > -1;
+                    });
+                    let FNDA = FNDAs.map(function(line) {
+                        return line.split(',')[1] || '';
+                    });
+                    let FN = FNs.map(function(line) {
+                        let temp = line.slice(3,line.length).split(',');
+                        return {
+                            lineNumber: Number(temp[0]),
+                            functionName: temp[1] || '',
+                            covered: FNDA.indexOf(temp[1] || '') !== -1
+                        };
+                    });
+                    console.log(FN);
                     console.log("file name matched");
                 }
             });
-            for (let lineNum: number = 0; lineNum < activeEditor.document.lineCount; lineNum++) {
-                let lineRange = new vscode.Range(lineNum, 0, lineNum, 0);
-                if (lineNum % 2 === 0) {
-                    // even
-                    let notCoveredDecoration = { range: lineRange, hoverMessage: '' };
-                    notCoveredLines.push(notCoveredDecoration);
-                } else {
-                    //odd
-                    let coveredDecoration = { range: lineRange, hoverMessage: '' };
-                    coveredLines.push(coveredDecoration);
-                }
-            }
+            
+            // for (let lineNum: number = 0; lineNum < activeEditor.document.lineCount; lineNum++) {
+            //     let lineRange = new vscode.Range(lineNum, 0, lineNum, 0);
+            //     if (lineNum % 2 === 0) {
+            //         // even
+            //         let notCoveredDecoration = { range: lineRange, hoverMessage: '' };
+            //         notCoveredLines.push(notCoveredDecoration);
+            //     } else {
+            //         //odd
+            //         let coveredDecoration = { range: lineRange, hoverMessage: '' };
+            //         coveredLines.push(coveredDecoration);
+            //     }
+            // }
 
             // let highlight = new vscode.DocumentHighlight(lineRange, vscode.DocumentHighlightKind.Text);
             // highlights.push(highlight);
