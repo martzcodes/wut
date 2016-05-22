@@ -11,7 +11,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.checkFile"
+    "onCommand:extension.checkFile",
+    "onCommand:extension.runTests"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -19,6 +20,10 @@
       {
         "command": "extension.checkFile",
         "title": "WUT: Check File"
+      },
+      {
+        "command": "extension.runTests",
+        "title": "WUT: Run Tests"
       }
     ],
     "configuration": {
@@ -28,6 +33,15 @@
         "wut.lcov": {
           "type": "string",
           "description": "Specifies the folder path containing lcov.info"
+        },
+        "wut.gruntTask": {
+          "type": "string",
+          "description": "Grunt Test Task"
+        },
+        "wut.runOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run on File Save"
         }
       }
     }

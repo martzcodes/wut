@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import fs = require('fs');
 import path = require('path');
 import * as _ from 'lodash';
+import cp = require('child_process');
 
 export interface ILineObject {
     lineNumber: number;
@@ -38,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
-    let disposable = vscode.commands.registerCommand('extension.checkFile', () => {
+    let checkFile = vscode.commands.registerCommand('extension.checkFile', () => {
         // The code you place here will be executed every time your command is executed
 
         let lcovPath = vscode.workspace.getConfiguration('wut').get('lcov') as string;
@@ -172,7 +173,7 @@ export function activate(context: vscode.ExtensionContext) {
                             lines.push(rObj);
                         }
                     });
-                    lines.sort((a,b) => {
+                    lines.sort((a, b) => {
                         return a.lineNumber - b.lineNumber;
                     });
                     lines.forEach(line => {
@@ -216,7 +217,30 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
-    context.subscriptions.push(disposable);
+    // The command has been defined in the package.json file
+    // Now provide the implementation of the command with  registerCommand
+    // The commandId parameter must match the command field in package.json
+    let runTests = vscode.commands.registerCommand('extension.runTests', () => {
+        //vscode.workspace.rootPath
+        let outChannel = vscode.window.createOutputChannel("wut");
+        outChannel.clear();
+        let args = [vscode.workspace.getConfiguration('wut').get('gruntTask') as string];
+
+        let proc = cp.spawn('grunt', args, { env: process.env, cwd: vscode.workspace.rootPath });
+        proc.stdout.on('data', chunk => outChannel.append(chunk.toString()));
+        proc.stderr.on('data', chunk => outChannel.append(chunk.toString()));
+        proc.on('close', code => {
+            if (code) {
+                outChannel.append('Error: Tests failed.');
+            } else {
+                outChannel.append('Success: Tests passed.');
+            }
+        });
+
+    });
+
+    context.subscriptions.push(checkFile);
+    context.subscriptions.push(runTests);
 }
 
 // this method is called when your extension is deactivated
