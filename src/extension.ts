@@ -19,30 +19,75 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World!');
-        let highlights: vscode.DocumentHighlight[] = [];
-        var smallNumbers : vscode.DecorationOptions[] = [];
         let activeEditor = vscode.window.activeTextEditor;
-        let lineRange = new vscode.Range(0, 0, 1, 10);
-        var decoration = { range: lineRange, hoverMessage: 'Something Here'};
-        smallNumbers.push(decoration);
-        let highlight = new vscode.DocumentHighlight(lineRange, vscode.DocumentHighlightKind.Text);
-        highlights.push(highlight);
-        var smallNumberDecorationType = vscode.window.createTextEditorDecorationType({
-            borderWidth: '2px',
-            borderStyle: 'solid',
-            overviewRulerColor: 'red',
-            overviewRulerLane: vscode.OverviewRulerLane.Right,
+        let notCovered = vscode.window.createTextEditorDecorationType({
+            isWholeLine: true,
+            // borderWidth: '2px',
+            // borderStyle: 'solid',
+            // overviewRulerColor: 'brown',
+            gutterIconPath: '/users/matthewmartz/Development/wut/images/bad.svg',
+            overviewRulerLane: vscode.OverviewRulerLane.Left,
             light: {
                 // this color will be used in light color themes
-                borderColor: 'darkred'
+                color: 'white',
+                overviewRulerColor: 'darkred',
+                backgroundColor: 'darkred'
             },
             dark: {
                 // this color will be used in dark color themes
-                borderColor: 'lightred'
+                color: 'black',
+                overviewRulerColor: 'lightred',
+                backgroundColor: 'lightred'
             }
         });
-        activeEditor.setDecorations(smallNumberDecorationType, smallNumbers);
-        console.log(activeEditor.document.lineCount);
+        let covered = vscode.window.createTextEditorDecorationType({
+            // isWholeLine: true,
+            // borderWidth: '2px',
+            // borderStyle: 'solid',
+            gutterIconPath: '/users/matthewmartz/Development/wut/images/good.svg',
+            overviewRulerLane: vscode.OverviewRulerLane.Right,
+            light: {
+                // this color will be used in light color themes
+                overviewRulerColor: 'darkgreen'
+            },
+            dark: {
+                // this color will be used in dark color themes
+                overviewRulerColor: 'lightgreen'
+            }
+        });
+        
+        let highlights: vscode.DocumentHighlight[] = [];
+        let notCoveredLines : vscode.DecorationOptions[] = [];
+        let coveredLines : vscode.DecorationOptions[] = [];
+        
+        // activeEditor.document.lineCount
+        
+        for(let lineNum: number = 0; lineNum < activeEditor.document.lineCount; lineNum++) {
+            let lineRange = new vscode.Range(lineNum, 0, lineNum, 0);
+            if (lineNum % 2 === 0) {
+                // even
+                let notCoveredDecoration = { range: lineRange, hoverMessage: ''};
+                notCoveredLines.push(notCoveredDecoration);
+            } else {
+                //odd
+                let coveredDecoration = { range: lineRange, hoverMessage: ''};
+                coveredLines.push(coveredDecoration);
+            }
+        }
+        
+        // let lineRange = new vscode.Range(0, 0, 1, 10);
+        // let notCoveredDecoration = { range: lineRange, hoverMessage: 'Something Here'};
+        // notCoveredLines.push(notCoveredDecoration);
+        // let highlight = new vscode.DocumentHighlight(lineRange, vscode.DocumentHighlightKind.Text);
+        // highlights.push(highlight);
+        
+        activeEditor.setDecorations(notCovered, notCoveredLines);
+        activeEditor.setDecorations(covered, coveredLines);
+        
+        let outChannel = vscode.window.createOutputChannel("test");
+        outChannel.show(true);
+        outChannel.append("hello");
+        
     });
 
     context.subscriptions.push(disposable);
