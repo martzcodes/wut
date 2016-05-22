@@ -11,11 +11,24 @@
     "Other"
   ],
   "activationEvents": [
+    "onLanguage:javascript",
     "onCommand:extension.checkFile",
-    "onCommand:extension.runTests"
+    "onCommand:extension.runTests",
+    "onCommand:extension.nothing"
   ],
   "main": "./out/src/extension",
   "contributes": {
+    "languages": [
+			{
+				"id": "javascript",
+				"extensions": [
+					".js"
+				],
+				"aliases": [
+					"js"
+				]
+			}
+		],
     "commands": [
       {
         "command": "extension.checkFile",
@@ -24,6 +37,10 @@
       {
         "command": "extension.runTests",
         "title": "WUT: Run Tests"
+      },
+      {
+        "command": "extension.nothing",
+        "title": "WUT: Nothing"
       }
     ],
     "configuration": {

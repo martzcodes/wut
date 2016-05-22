@@ -74,14 +74,16 @@ module.exports = function (grunt) {
 - <s>Add Warnings</s>
 - <s>Hover text</s>
 - <s>Run tests from extension command</s>
-- Activate extension (or register some things) on workspace open?
-- Run command on file save
-- Run tests on file save
+- <s>Activate extension (or register some things) on workspace open?</s> (I check for .js extension, that way I don't un-necessarily load the extension)
+- <s>Run command on file save</s>
+- <s>Run tests on file save</s>
 - <s>Run tests for individual file</s> (see example Gruntfile.js above)
 - Run tests for individual file on file save
 - Parse test output for failing file / test
 - Highlight failing tests in spec
 - Display expected info in spec (hovertext? caption? ??)
+- ? Save a coverage (json?) file (with percents)
+- ? On file save re-calculate coverage and show the delta
 
 ## References
 
