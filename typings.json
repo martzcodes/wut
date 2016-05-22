@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "lodash": "registry:npm/lodash#4.0.0+20160416211519"
+  },
+  "ambientDependencies": {
+    "lodash": "registry:dt/lodash#3.10.0+20160330154726"
+  }
+}
