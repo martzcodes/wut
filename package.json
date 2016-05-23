@@ -55,10 +55,19 @@
           "type": "string",
           "description": "Grunt Test Task"
         },
+        "wut.specName": {
+          "type": "string",
+          "description": "Spec Extension (e.g. spec.js)"
+        },
         "wut.runOnSave": {
           "type": "boolean",
           "default": false,
           "description": "Run on File Save"
+        },
+        "wut.onlyTestsInFolder": {
+          "type": "boolean",
+          "default": false,
+          "description": "Only Run Tests In Folder"
         }
       }
     }

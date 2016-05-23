@@ -35,79 +35,86 @@ export function activate(context: vscode.ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "wut" is now active!');
-    vscode.workspace.onDidSaveTextDocument(document => {
-        vscode.commands.executeCommand('extension.runTests').then((value) => {
-            vscode.commands.executeCommand('extension.checkFile');
-        });
+    let outChannel = vscode.window.createOutputChannel("wut");
+    let activeEditor = vscode.window.activeTextEditor;
+    let notCovered = vscode.window.createTextEditorDecorationType({
+        isWholeLine: true,
+        // borderWidth: '2px',
+        // borderStyle: 'solid',
+        // overviewRulerColor: 'brown',
+        gutterIconPath: '/users/matthewmartz/Development/wut/images/bad.svg',
+        overviewRulerLane: vscode.OverviewRulerLane.Left,
+        light: {
+            // this color will be used in light color themes
+            color: 'white',
+            overviewRulerColor: 'darkred',
+            backgroundColor: 'darkred'
+        },
+        dark: {
+            // this color will be used in dark color themes
+            color: 'black',
+            overviewRulerColor: 'lightred',
+            backgroundColor: 'lightred'
+        }
+    });
+    let covered = vscode.window.createTextEditorDecorationType({
+        // isWholeLine: true,
+        // borderWidth: '2px',
+        // borderStyle: 'solid',
+        gutterIconPath: '/users/matthewmartz/Development/wut/images/good.svg',
+        overviewRulerLane: vscode.OverviewRulerLane.Right,
+        light: {
+            // this color will be used in light color themes
+            overviewRulerColor: 'darkgreen'
+        },
+        dark: {
+            // this color will be used in dark color themes
+            overviewRulerColor: 'lightgreen'
+        }
+    });
+    let warning = vscode.window.createTextEditorDecorationType({
+        // isWholeLine: true,
+        // borderWidth: '2px',
+        // borderStyle: 'solid',
+        gutterIconPath: '/users/matthewmartz/Development/wut/images/warning.svg',
+        overviewRulerLane: vscode.OverviewRulerLane.Center,
+        light: {
+            // this color will be used in light color themes
+            overviewRulerColor: 'darkorange'
+        },
+        dark: {
+            // this color will be used in dark color themes
+            overviewRulerColor: 'lightorange'
+        }
     });
 
+    vscode.workspace.onDidSaveTextDocument(document => {
+        if (document.languageId === 'javascript') {
+            let filePath = document.fileName.substring(0, document.fileName.lastIndexOf('/'));
+            vscode.commands.executeCommand('extension.runTests', filePath).then((value) => {
+                if (document.fileName.indexOf(vscode.workspace.getConfiguration('wut').get('specName') as string) > -1) {
+                    // was a spec file
+                } else {
+                    vscode.commands.executeCommand('extension.checkFile', value);
+                }
+            });
+        }
+    });
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
-    let checkFile = vscode.commands.registerCommand('extension.checkFile', () => {
+    let checkFile = vscode.commands.registerCommand('extension.checkFile', (testsErrored) => {
         return new Promise(resolve => {
 
             // The code you place here will be executed every time your command is executed
 
             let lcovPath = vscode.workspace.getConfiguration('wut').get('lcov') as string;
             let lcov = "";
-            let activeEditor = vscode.window.activeTextEditor;
-            let notCovered = vscode.window.createTextEditorDecorationType({
-                isWholeLine: true,
-                // borderWidth: '2px',
-                // borderStyle: 'solid',
-                // overviewRulerColor: 'brown',
-                gutterIconPath: '/users/matthewmartz/Development/wut/images/bad.svg',
-                overviewRulerLane: vscode.OverviewRulerLane.Left,
-                light: {
-                    // this color will be used in light color themes
-                    color: 'white',
-                    overviewRulerColor: 'darkred',
-                    backgroundColor: 'darkred'
-                },
-                dark: {
-                    // this color will be used in dark color themes
-                    color: 'black',
-                    overviewRulerColor: 'lightred',
-                    backgroundColor: 'lightred'
-                }
-            });
-            let covered = vscode.window.createTextEditorDecorationType({
-                // isWholeLine: true,
-                // borderWidth: '2px',
-                // borderStyle: 'solid',
-                gutterIconPath: '/users/matthewmartz/Development/wut/images/good.svg',
-                overviewRulerLane: vscode.OverviewRulerLane.Right,
-                light: {
-                    // this color will be used in light color themes
-                    overviewRulerColor: 'darkgreen'
-                },
-                dark: {
-                    // this color will be used in dark color themes
-                    overviewRulerColor: 'lightgreen'
-                }
-            });
-            let warning = vscode.window.createTextEditorDecorationType({
-                // isWholeLine: true,
-                // borderWidth: '2px',
-                // borderStyle: 'solid',
-                gutterIconPath: '/users/matthewmartz/Development/wut/images/warning.svg',
-                overviewRulerLane: vscode.OverviewRulerLane.Center,
-                light: {
-                    // this color will be used in light color themes
-                    overviewRulerColor: 'darkorange'
-                },
-                dark: {
-                    // this color will be used in dark color themes
-                    overviewRulerColor: 'lightorange'
-                }
-            });
 
             let coveredLines: vscode.DecorationOptions[] = [];
             let warningLines: vscode.DecorationOptions[] = [];
             let notCoveredLines: vscode.DecorationOptions[] = [];
-            let outChannel = vscode.window.createOutputChannel("wut");
             // vscode.window.showInformationMessage('Hello World!');
 
             fs.readFile(path.join(vscode.workspace.rootPath, lcovPath), function (err, data) {
@@ -188,7 +195,7 @@ export function activate(context: vscode.ExtensionContext) {
                             let lineRange = new vscode.Range(line.lineNumber - 1, 0, line.lineNumber - 1, activeEditor.document.lineAt(line.lineNumber).range.end.character);
                             let coverCheck = (line.functionCovered === true || line.functionCovered === null) && (line.lineCovered === null || line.lineCovered === true) && (line.branchCovered === null || line.branchCovered === true);
                             let notCoveredCheck = line.functionCovered === false || line.lineCovered === false || line.branchCovered === false;
-                            if (coverCheck) {
+                            if (coverCheck && !testsErrored) {
                                 let coveredDecoration = { range: lineRange, hoverMessage: '' };
                                 coveredLines.push(coveredDecoration);
                             } else {
@@ -205,7 +212,7 @@ export function activate(context: vscode.ExtensionContext) {
                                 if (line.branchCovered === false) {
                                     hoverMessage += sep + ' branch';
                                 }
-                                if (line.functionCovered === false && line.lineCovered === false && line.branchCovered === false) {
+                                if ((line.functionCovered === false && line.lineCovered === false && line.branchCovered === false) || testsErrored) {
                                     let notCoveredDecoration = { range: lineRange, hoverMessage: hoverMessage };
                                     notCoveredLines.push(notCoveredDecoration);
                                 } else {
@@ -214,6 +221,9 @@ export function activate(context: vscode.ExtensionContext) {
                                 }
                                 outChannel.show(true);
                                 outChannel.appendLine(hoverMessage);
+                                if (testsErrored) {
+                                    outChannel.appendLine("A test failed...");
+                                }
                             }
                         });
 
@@ -227,26 +237,59 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    function processErrors(data: string) {
+        let errorLines: vscode.DecorationOptions[] = [];
+        let dataErrors = data.match(/(?:FAILED\n.)(Expected .*\n.*)/g);
+        console.log(dataErrors);
+        let errorMap = dataErrors.map((err) => {
+            let output = {
+                lineNumber: Number(err.substring(err.lastIndexOf(':') + 1, err.length - 1)) + 1,
+                errorPath: err.substring(err.lastIndexOf('at /') + 3, err.lastIndexOf(':')),
+                errorText: err.substring(err.indexOf('Expected'), err.lastIndexOf('\n'))
+            };
+            return output;
+        });
+        errorMap.forEach((err) => {
+            let lineRange = new vscode.Range(err.lineNumber - 1, 0, err.lineNumber - 1, activeEditor.document.lineAt(err.lineNumber).range.end.character);
+            let errorDecoration = { range: lineRange, hoverMessage: err.errorText };
+            console.log(err.errorPath);
+            console.log(activeEditor.document.fileName);
+            if (activeEditor.document.fileName === err.errorPath) {
+                console.log("matched");
+                errorLines.push(errorDecoration);
+            }
+        });
+        activeEditor.setDecorations(notCovered, errorLines);
+    }
+
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json)
-    let runTests = vscode.commands.registerCommand('extension.runTests', () => {
+    let runTests = vscode.commands.registerCommand('extension.runTests', (value) => {
         return new Promise(resolve => {
             //vscode.workspace.rootPath
-            let outChannel = vscode.window.createOutputChannel("wut");
             outChannel.clear();
             let args = [vscode.workspace.getConfiguration('wut').get('gruntTask') as string];
+            if (value) {
+                args.push('--folder=' + value);
+            }
+            let data: string[] = [];
 
             let proc = cp.spawn('grunt', args, { env: process.env, cwd: vscode.workspace.rootPath });
-            proc.stdout.on('data', chunk => outChannel.append(chunk.toString()));
+            proc.stdout.on('data', chunk => {
+                data.push(chunk.toString());
+                outChannel.append(chunk.toString());
+            });
             proc.stderr.on('data', chunk => outChannel.append(chunk.toString()));
             proc.on('close', code => {
                 if (code) {
                     outChannel.append('Error: Tests failed.');
+                    processErrors(data.join(''));
+                    resolve(true);
                 } else {
                     outChannel.append('Success: Tests passed.');
+                    resolve(false);
                 }
-                resolve();
             });
         });
     });

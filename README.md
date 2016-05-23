@@ -17,7 +17,7 @@
 
 ```
 module.exports = function (grunt) {
-	function getKarmaConfig(testTarget) {
+	function getKarmaConfig(testFolder, testTarget) {
 		return {
 			options: {
 				configFile: 'test/karma-conf.js'
@@ -34,7 +34,7 @@ module.exports = function (grunt) {
 					{ src: 'app/js/app.js' },
 
 					// include unit test specs
-					{ src: 'test/unit/' + testTarget }
+					{ src: testTarget ? testTarget : testFolder ? testFolder + '*.spec.js' : 'app/js/**/*.spec.js' }
 				]
 			}
 		};
@@ -56,8 +56,9 @@ module.exports = function (grunt) {
 	...
 
 	var target = grunt.option('target') || '';
+	var folder = grunt.option('folder') || '';
 	grunt.registerTask('one', function () {
-		grunt.config.set('karma', getKarmaConfig(target));
+		grunt.config.set('karma', getKarmaConfig(folder, target));
 		grunt.task.run(['karma:one:start']);
 	});
 };
@@ -78,7 +79,7 @@ module.exports = function (grunt) {
 - <s>Run command on file save</s>
 - <s>Run tests on file save</s>
 - <s>Run tests for individual file</s> (see example Gruntfile.js above)
-- Run tests for individual file on file save
+- <s>Run tests for individual file on file save</s> (for folder that the file is in)
 - Parse test output for failing file / test
 - Highlight failing tests in spec
 - Display expected info in spec (hovertext? caption? ??)
