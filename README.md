@@ -1,7 +1,7 @@
 # README
 ## What is wut?
 
-`wut` is an extension that I'm hoping will overlay code coverage information and run unit tests specific to individual files.  This will be my first VSCode extension and seems like a good opportunity to poke around a bit.
+`wut` is an extension that I'm hoping will overlay code coverage information and run unit tests specific to individual files.  This will be my first VSCode extension and seems like a good opportunity to poke around a bit.  The code is hosted on github if you want to contribute: https://github.com/entrocode/wut  
 
 ## Config Example (Workspace settings)
 
@@ -80,9 +80,9 @@ module.exports = function (grunt) {
 - <s>Run tests on file save</s>
 - <s>Run tests for individual file</s> (see example Gruntfile.js above)
 - <s>Run tests for individual file on file save</s> (for folder that the file is in)
-- Parse test output for failing file / test
-- Highlight failing tests in spec
-- Display expected info in spec (hovertext? caption? ??)
+- <s>Parse test output for failing file / test</s>
+- <s>Highlight failing tests in spec</s>
+- <s>Display expected info in spec</s> hovertext at beginning of line and in console
 - ? Save a coverage (json?) file (with percents)
 - ? On file save re-calculate coverage and show the delta
 

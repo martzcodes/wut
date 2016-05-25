@@ -240,10 +240,9 @@ export function activate(context: vscode.ExtensionContext) {
     function processErrors(data: string) {
         let errorLines: vscode.DecorationOptions[] = [];
         let dataErrors = data.match(/(?:FAILED\n.)(Expected .*\n.*)/g);
-        console.log(dataErrors);
         let errorMap = dataErrors.map((err) => {
             let output = {
-                lineNumber: Number(err.substring(err.lastIndexOf(':') + 1, err.length - 1)) + 1,
+                lineNumber: Number(err.substring(err.lastIndexOf(':') + 1, err.length)),
                 errorPath: err.substring(err.lastIndexOf('at /') + 3, err.lastIndexOf(':')),
                 errorText: err.substring(err.indexOf('Expected'), err.lastIndexOf('\n'))
             };
@@ -252,12 +251,11 @@ export function activate(context: vscode.ExtensionContext) {
         errorMap.forEach((err) => {
             let lineRange = new vscode.Range(err.lineNumber - 1, 0, err.lineNumber - 1, activeEditor.document.lineAt(err.lineNumber).range.end.character);
             let errorDecoration = { range: lineRange, hoverMessage: err.errorText };
-            console.log(err.errorPath);
-            console.log(activeEditor.document.fileName);
             if (activeEditor.document.fileName === err.errorPath) {
-                console.log("matched");
                 errorLines.push(errorDecoration);
             }
+            outChannel.show(true);
+            outChannel.appendLine(err.lineNumber + ': ' + err.errorText);
         });
         activeEditor.setDecorations(notCovered, errorLines);
     }
