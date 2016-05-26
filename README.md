@@ -7,7 +7,9 @@
 
 ```
 {
-    "wut.lcov":"./test-results/coverage/PhantomJS 1.9.8 (Mac OS X 0.0.0)/lcov.info"
+    "wut.lcov":"./test-results/coverage/PhantomJS 1.9.8 (Mac OS X 0.0.0)/lcov.info",
+    "wut.runOnSave": true,
+    "wut.gruntTask": "one"
 }
 ```
 
@@ -30,7 +32,7 @@ module.exports = function (grunt) {
 					{ src: 'test/lib/angular-mocks.js' },
 
 					// include JS files
-					{ src: 'app/js/**/*.js' },
+					{ src: ['!app/js/**/*.spec.js', 'app/js/**/*.js'] },
 					{ src: 'app/js/app.js' },
 
 					// include unit test specs
