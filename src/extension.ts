@@ -249,13 +249,13 @@ export function activate(context: vscode.ExtensionContext) {
             return output;
         });
         errorMap.forEach((err) => {
-            let lineRange = new vscode.Range(err.lineNumber - 1, 0, err.lineNumber - 1, activeEditor.document.lineAt(err.lineNumber).range.end.character);
-            let errorDecoration = { range: lineRange, hoverMessage: err.errorText };
-            if (activeEditor.document.fileName === err.errorPath) {
-                errorLines.push(errorDecoration);
-            }
-            outChannel.show(true);
-            outChannel.appendLine(err.lineNumber + ': ' + err.errorText);
+            // let lineRange = new vscode.Range(err.lineNumber - 1, 0, err.lineNumber - 1, activeEditor.document.lineAt(err.lineNumber - 1).range.end.character);
+            // let errorDecoration = { range: lineRange, hoverMessage: err.errorText };
+            // if (activeEditor.document.fileName === err.errorPath) {
+            //     // errorLines.push(errorDecoration);
+            // }
+            // outChannel.show(true);
+            // outChannel.appendLine(err.lineNumber + ': ' + err.errorText);
         });
         activeEditor.setDecorations(notCovered, errorLines);
     }
@@ -265,7 +265,6 @@ export function activate(context: vscode.ExtensionContext) {
     // The commandId parameter must match the command field in package.json)
     let runTests = vscode.commands.registerCommand('extension.runTests', (value) => {
         return new Promise(resolve => {
-            //vscode.workspace.rootPath
             outChannel.clear();
             let args = [vscode.workspace.getConfiguration('wut').get('gruntTask') as string];
             if (value) {
